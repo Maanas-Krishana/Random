@@ -1,21 +1,369 @@
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    var profitLossData = {{ profit_loss_data|tojson }};
-    
-    var timestamps = profitLossData.map(function(data) { return data.timestamp });
-    var profitLossValues = profitLossData.map(function(data) { return data.profit_loss });
-
-    var ctx = document.getElementById('profitLossChart').getContext('2d');
-    var profitLossChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: timestamps,
-            datasets: [{
-                label: 'Profit & Loss',
-                data: profitLossValues,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio & Profit/Loss Dashboard | Virtual Stock</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-container {
+            max-width: 1300px;
+            margin: 90px auto 40px;
+            padding: 0 5%;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
-    });
-</script>
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            backdrop-filter: var(--blur-glass);
+            transition: var(--transition-smooth);
+        }
+
+        .metric-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-3px);
+        }
+
+        .chart-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            backdrop-filter: var(--blur-glass);
+        }
+
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 1.8rem;
+            backdrop-filter: var(--blur-glass);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            padding: 0.9rem 1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        td {
+            padding: 1.1rem 1rem;
+            border-bottom: 1px solid var(--border-glass);
+            color: var(--text-primary);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header>
+        <div class="logo" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>VirtualStock</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i> Markets</a>
+            <a href="profit_loss.html" class="nav-link active"><i class="fa-solid fa-wallet"></i> Portfolio & P/L</a>
+            <a href="chat.html" class="nav-link"><i class="fa-solid fa-robot"></i> AI Analyst</a>
+        </nav>
+
+        <div class="header-actions">
+            <button class="btn-secondary" onclick="resetDemoBalance()" style="font-size:0.8rem;">
+                <i class="fa-solid fa-rotate-right"></i> Reset Portfolio
+            </button>
+            <a href="index.html" class="btn-primary">
+                <i class="fa-solid fa-cart-plus"></i> New Trade
+            </a>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Performance Overview Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="stat-label">Total Portfolio Net Worth</div>
+                <div class="stat-value" id="netWorthDisplay">₹1,00,000</div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">Cash + Invested Assets</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="stat-label">Available Virtual Cash</div>
+                <div class="stat-value" style="color:var(--accent-secondary);" id="cashDisplay">₹1,00,000</div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">Liquid funds for orders</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="stat-label">Total Unrealized P&L</div>
+                <div class="stat-value" id="pnlDisplay">₹0.00</div>
+                <div style="font-size:0.8rem;" id="pnlPercentDisplay">+0.00% Overall</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="stat-label">Total Executed Trades</div>
+                <div class="stat-value" style="color:var(--accent-primary);" id="totalTradesDisplay">0</div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">Simulated transactions</div>
+            </div>
+        </div>
+
+        <!-- Interactive P&L Chart -->
+        <div class="chart-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <div>
+                    <h3 style="font-family:var(--font-display); font-size:1.4rem;">Portfolio Performance Curve</h3>
+                    <p style="color:var(--text-secondary); font-size:0.85rem;">Historical balance and profit trajectory</p>
+                </div>
+                <span class="ticker-change up" id="chartStatusBadge"><i class="fa-solid fa-wave-square"></i> Realtime Simulation</span>
+            </div>
+            <div style="position:relative; height:320px; width:100%;">
+                <canvas id="profitLossChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Active Holdings Table -->
+        <div class="table-card">
+            <h3 style="font-family:var(--font-display); font-size:1.3rem; margin-bottom:1rem;">Active Stock Positions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Quantity</th>
+                        <th>Avg. Buy Price</th>
+                        <th>Current Price</th>
+                        <th>Invested Value</th>
+                        <th>Current Value</th>
+                        <th>P&L (Unrealized)</th>
+                    </tr>
+                </thead>
+                <tbody id="holdingsTableBody">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Trade History Table -->
+        <div class="table-card">
+            <h3 style="font-family:var(--font-display); font-size:1.3rem; margin-bottom:1rem;">Recent Order History</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Order ID</th>
+                        <th>Stock</th>
+                        <th>Action</th>
+                        <th>Quantity</th>
+                        <th>Executed Price</th>
+                        <th>Total Value</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        const STOCKS_MAP = {
+            'RELIANCE': { name: 'Reliance Industries', price: 2980.50 },
+            'TCS': { name: 'Tata Consultancy Services', price: 4250.40 },
+            'HDFCBANK': { name: 'HDFC Bank Ltd.', price: 1640.80 },
+            'INFY': { name: 'Infosys Limited', price: 1890.20 },
+            'ICICIBANK': { name: 'ICICI Bank Ltd.', price: 1195.60 },
+            'AAPL': { name: 'Apple Inc.', price: 224.50, isUSD: true },
+            'NVDA': { name: 'NVIDIA Corp.', price: 128.20, isUSD: true },
+            'TSLA': { name: 'Tesla Inc.', price: 214.10, isUSD: true }
+        };
+
+        function formatVal(val, isUSD = false) {
+            if (isUSD) return '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return '₹' + val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        let chartInstance = null;
+
+        function loadDashboard() {
+            const balance = parseFloat(localStorage.getItem('vs_balance')) || 100000.00;
+            const portfolio = JSON.parse(localStorage.getItem('vs_portfolio')) || {};
+            const trades = JSON.parse(localStorage.getItem('vs_trades')) || [];
+
+            let totalInvested = 0;
+            let currentPortfolioVal = 0;
+
+            const holdingsBody = document.getElementById('holdingsTableBody');
+            holdingsBody.innerHTML = '';
+
+            const holdingKeys = Object.keys(portfolio);
+            if (holdingKeys.length === 0) {
+                holdingsBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:2rem;">No open positions yet. Go to <a href="index.html" style="color:var(--accent-primary); text-decoration:underline;">Markets</a> to execute simulated trades!</td></tr>`;
+            } else {
+                holdingKeys.forEach(symbol => {
+                    const item = portfolio[symbol];
+                    if (item.quantity <= 0) return;
+                    const stockData = STOCKS_MAP[symbol] || { name: symbol, price: item.avgPrice, isUSD: item.isUSD };
+                    const currentPrice = stockData.price;
+                    const investedVal = item.quantity * item.avgPrice;
+                    const currentVal = item.quantity * currentPrice;
+                    const pnl = currentVal - investedVal;
+                    const pnlPercent = investedVal > 0 ? (pnl / investedVal) * 100 : 0;
+                    const isPositive = pnl >= 0;
+
+                    totalInvested += investedVal;
+                    currentPortfolioVal += currentVal;
+
+                    holdingsBody.innerHTML += `
+                        <tr>
+                            <td><strong>${symbol}</strong><br><span style="font-size:0.75rem; color:var(--text-muted);">${stockData.name}</span></td>
+                            <td>${item.quantity}</td>
+                            <td>${formatVal(item.avgPrice, item.isUSD)}</td>
+                            <td>${formatVal(currentPrice, item.isUSD)}</td>
+                            <td>${formatVal(investedVal, item.isUSD)}</td>
+                            <td>${formatVal(currentVal, item.isUSD)}</td>
+                            <td>
+                                <span class="ticker-change ${isPositive ? 'up' : 'down'}">
+                                    <i class="fa-solid fa-arrow-trend-${isPositive ? 'up' : 'down'}"></i>
+                                    ${formatVal(pnl, item.isUSD)} (${pnlPercent.toFixed(2)}%)
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const netWorth = balance + currentPortfolioVal;
+            const totalPnL = netWorth - 100000.00;
+            const totalRoi = (totalPnL / 100000.00) * 100;
+
+            document.getElementById('netWorthDisplay').textContent = formatVal(netWorth);
+            document.getElementById('cashDisplay').textContent = formatVal(balance);
+            document.getElementById('totalTradesDisplay').textContent = trades.length;
+
+            const pnlEl = document.getElementById('pnlDisplay');
+            pnlEl.textContent = (totalPnL >= 0 ? '+' : '') + formatVal(totalPnL);
+            pnlEl.style.color = totalPnL >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+
+            const roiEl = document.getElementById('pnlPercentDisplay');
+            roiEl.textContent = `${totalRoi >= 0 ? '+' : ''}${totalRoi.toFixed(2)}% Overall Return`;
+            roiEl.style.color = totalRoi >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+
+            // Render Trades History
+            const histBody = document.getElementById('historyTableBody');
+            histBody.innerHTML = '';
+            if (trades.length === 0) {
+                histBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:2rem;">No trade transactions recorded yet.</td></tr>`;
+            } else {
+                trades.slice(0, 10).forEach(t => {
+                    const isBuy = t.type === 'BUY';
+                    const timeStr = new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    histBody.innerHTML += `
+                        <tr>
+                            <td>${timeStr}</td>
+                            <td style="font-family:monospace; color:var(--text-muted);">${t.id}</td>
+                            <td><strong>${t.symbol}</strong></td>
+                            <td><span class="ticker-change ${isBuy ? 'up' : 'down'}">${t.type}</span></td>
+                            <td>${t.quantity}</td>
+                            <td>${formatVal(t.price)}</td>
+                            <td>${formatVal(t.total)}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            renderChart(trades, netWorth);
+        }
+
+        function renderChart(trades, currentNetWorth) {
+            const ctx = document.getElementById('profitLossChart').getContext('2d');
+            
+            // Build chart points
+            let labels = ['Initial', 'T-4', 'T-3', 'T-2', 'T-1', 'Now'];
+            let dataPoints = [100000, 100250, 99800, 101100, 100600, currentNetWorth];
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Portfolio Net Worth (₹)',
+                        data: dataPoints,
+                        borderColor: '#6366f1',
+                        borderWidth: 3,
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#818cf8',
+                        pointBorderColor: '#fff',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { family: "'Outfit', sans-serif" },
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+        }
+
+        function resetDemoBalance() {
+            if (confirm('Reset trading balance to ₹1,00,000 and clear all positions?')) {
+                localStorage.setItem('vs_balance', '100000.00');
+                localStorage.removeItem('vs_portfolio');
+                localStorage.removeItem('vs_trades');
+                loadDashboard();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

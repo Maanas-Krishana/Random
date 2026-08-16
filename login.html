@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Login & Register | Virtual Stock</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 5%;
+            margin-top: 60px;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: var(--blur-glass);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-full);
+            padding: 0.3rem;
+            border: 1px solid var(--border-glass);
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.6rem;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .auth-tab.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 2.4rem;
+            color: var(--text-muted);
+        }
+
+        .input-group input {
+            padding-left: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header>
+        <div class="logo" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>VirtualStock</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i> Markets</a>
+            <a href="profit_loss.html" class="nav-link"><i class="fa-solid fa-wallet"></i> Portfolio & P/L</a>
+            <a href="chat.html" class="nav-link"><i class="fa-solid fa-robot"></i> AI Analyst</a>
+        </nav>
+
+        <div class="header-actions">
+            <a href="index.html" class="btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Back to Markets
+            </a>
+        </div>
+    </header>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div style="text-align:center;">
+                <h2 style="font-family:var(--font-display); font-size:1.8rem; margin-bottom:0.4rem;" id="authTitle">Welcome Back</h2>
+                <p style="color:var(--text-secondary); font-size:0.9rem;">Sign in to access your virtual trading account</p>
+            </div>
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Login</div>
+                <div class="auth-tab" id="tabRegister" onclick="switchTab('register')">Register</div>
+            </div>
+
+            <form class="auth-form" id="authForm" onsubmit="handleAuth(event)">
+                <div class="input-group">
+                    <label class="form-label" for="phoneInput">Mobile Number</label>
+                    <i class="fa-solid fa-phone"></i>
+                    <input type="tel" id="phoneInput" class="form-input" placeholder="+91 9876543210" required>
+                </div>
+
+                <div class="input-group">
+                    <label class="form-label" for="passInput">Password / Security PIN</label>
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="passInput" class="form-input" placeholder="••••••••" required>
+                </div>
+
+                <div class="input-group" id="otpGroup" style="display:none;">
+                    <label class="form-label" for="otpInput">SMS OTP Verification</label>
+                    <i class="fa-solid fa-key"></i>
+                    <input type="text" id="otpInput" class="form-input" placeholder="6-digit OTP code">
+                </div>
+
+                <button type="submit" class="btn-primary" style="justify-content:center; padding:0.8rem; margin-top:0.5rem;" id="submitBtn">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In to Trading Account
+                </button>
+            </form>
+
+            <div style="font-size:0.8rem; color:var(--text-muted); text-align:center; line-height:1.4;">
+                <i class="fa-solid fa-shield-halved"></i> New accounts automatically receive ₹1,00,000 virtual balance.
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        let currentMode = 'login';
+
+        function switchTab(mode) {
+            currentMode = mode;
+            document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+            document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
+            document.getElementById('authTitle').textContent = mode === 'login' ? 'Welcome Back' : 'Create Virtual Account';
+            document.getElementById('submitBtn').innerHTML = mode === 'login' 
+                ? '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Trading Account'
+                : '<i class="fa-solid fa-user-plus"></i> Claim ₹1,00,000 & Register';
+            document.getElementById('otpGroup').style.display = mode === 'register' ? 'flex' : 'none';
+        }
+
+        function handleAuth(e) {
+            e.preventDefault();
+            const phone = document.getElementById('phoneInput').value.trim();
+            const pass = document.getElementById('passInput').value.trim();
+
+            if (!phone || !pass) {
+                showToast('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            // Save user session
+            localStorage.setItem('vs_user', JSON.stringify({ phone, loggedIn: true }));
+            if (currentMode === 'register' && !localStorage.getItem('vs_balance')) {
+                localStorage.setItem('vs_balance', '100000.00');
+            }
+
+            showToast(`${currentMode === 'login' ? 'Signed in' : 'Registered'} successfully! Redirecting...`, 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1200);
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? 'circle-check' : (type === 'error' ? 'circle-exclamation' : 'circle-info');
+            toast.innerHTML = `<i class="fa-solid fa-${icon}"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
