@@ -1,438 +1,310 @@
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-</head>
-<body>
-<style>:root {
-            --primary-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
-            --secondary-gradient: linear-gradient(135deg, #f472b6, #db2777);
-            --bg-color: #ffffff;
-            --chat-bg: #f8fafc;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --bot-message-bg: #f1f5f9;
-            --user-message-bg: #818cf8;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #0f172a;
-            --chat-bg: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --bot-message-bg: #334155;
-            --user-message-bg: #6366f1;
-            --border-color: #334155;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 100px;
-            margin: 0 auto;
-            height: 100vh;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Market Analyst Copilot | Virtual Stock</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .chat-layout {
+            max-width: 1100px;
+            margin: 80px auto 20px;
+            padding: 0 1rem;
+            height: calc(100vh - 100px);
             display: flex;
             flex-direction: column;
+            gap: 1rem;
         }
 
-        .header {
+        .chat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: var(--blur-glass);
+        }
+
+        .chat-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem;
-            background-color: var(--bg-color);
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
+            padding: 1.2rem 1.8rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-bottom: 1px solid var(--border-glass);
         }
 
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .header-title h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .bot-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .controls {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .theme-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-primary);
-            font-size: 1.25rem;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            background-color: var(--bot-message-bg);
-        }
-
-        .chat-container {
+        .chat-messages {
             flex: 1;
+            padding: 1.5rem;
             overflow-y: auto;
-            padding: 2rem;
-            background-color: var(--chat-bg);
-            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
         }
 
         .message {
             display: flex;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: messageAppear 0.5s ease forwards;
+            gap: 0.9rem;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes messageAppear {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            margin-right: 1rem;
-            background: var(--primary-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            box-shadow: var(--shadow-md);
-        }
-
-        .user-message .avatar {
-            background: var(--secondary-gradient);
-        }
-
-        .message-bubble {
-            max-width: 70%;
-            padding: 1rem 1.5rem;
-            border-radius: 1rem;
-            box-shadow: var(--shadow-sm);
-            line-height: 1.5;
-            position: relative;
-        }
-
-        .bot-message .message-bubble {
-            background-color: var(--bot-message-bg);
-            border-top-left-radius: 0;
-        }
-
-        .user-message {
+        .message.user-message {
+            align-self: flex-end;
             flex-direction: row-reverse;
         }
 
-        .user-message .avatar {
-            margin-right: 0;
-            margin-left: 1rem;
+        .message-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
         }
 
-        .user-message .message-bubble {
-            background: var(--user-message-bg);
+        .bot-message .message-avatar {
+            background: var(--gradient-brand);
             color: white;
-            border-top-right-radius: 0;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .user-message .message-avatar {
+            background: var(--accent-secondary);
+            color: #0b0f19;
+        }
+
+        .message-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            padding: 1rem 1.2rem;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .user-message .message-content {
+            background: var(--accent-primary);
+            color: white;
+            border-color: transparent;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            gap: 0.6rem;
+            padding: 0.8rem 1.5rem;
+            overflow-x: auto;
+            border-top: 1px solid var(--border-glass);
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-glass);
+            padding: 0.45rem 0.9rem;
+            border-radius: var(--radius-full);
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .chip:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 1rem 1.5rem;
+            gap: 0.8rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-top: 1px solid var(--border-glass);
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            padding: 0.8rem 1.2rem;
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-glow);
         }
 
         .typing-indicator {
             display: none;
-            padding: 1rem 1.5rem;
-            background-color: var(--bot-message-bg);
-            border-radius: 1rem;
-            width: fit-content;
-            margin-left: 3.5rem;
-            box-shadow: var(--shadow-sm);
+            padding: 0.5rem 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
         }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header>
+        <div class="logo" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>VirtualStock</span>
+        </div>
 
-        .typing-dots {
-            display: flex;
-            gap: 0.4rem;
-        }
+        <nav class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i> Markets</a>
+            <a href="profit_loss.html" class="nav-link"><i class="fa-solid fa-wallet"></i> Portfolio & P/L</a>
+            <a href="chat.html" class="nav-link active"><i class="fa-solid fa-robot"></i> AI Analyst</a>
+        </nav>
 
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--text-secondary);
-            border-radius: 50%;
-            animation: typingBounce 1.4s infinite ease-in-out;
-        }
+        <div class="header-actions">
+            <a href="index.html" class="btn-primary">
+                <i class="fa-solid fa-bolt"></i> Trade Stocks
+            </a>
+        </div>
+    </header>
 
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes typingBounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        .input-container {
-            padding: 1.5rem;
-            background-color: var(--bg-color);
-            border-top: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 1rem;
-            background-color: var(--chat-bg);
-            border-radius: 1rem;
-            padding: 0.5rem;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: none;
-            background: none;
-            color: var(--text-primary);
-            font-size: 1rem;
-        }
-
-        .message-input:focus {
-            outline: none;
-        }
-
-        .message-input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            padding: 0.5rem;
-        }
-
-        .action-button {
-            background: none;
-            border: none;
-            padding: 0.75rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .action-button:hover {
-            background-color: var(--bot-message-bg);
-            color: var(--text-primary);
-        }
-
-        .send-button {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .send-button:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                height: 100dvh;
-            }
-
-            .header-title h1 {
-                font-size: 1.25rem;
-            }
-
-            .chat-container {
-                padding: 1rem;
-            }
-
-            .message-bubble {
-                max-width: 85%;
-            }
-
-            .input-container {
-                padding: 1rem;
-            }
-        }</style>
-    <div class="container">
-        <header class="header">
-            <div class="header-title">
-                <h1>AI Assistant</h1>
-                <div class="bot-status">
-                    <div class="status-indicator"></div>
-                    <span>Online</span>
+    <div class="chat-layout">
+        <div class="chat-card">
+            <div class="chat-header">
+                <div style="display:flex; align-items:center; gap:0.8rem;">
+                    <div class="bot-status">
+                        <div class="status-indicator"></div>
+                        <span style="font-weight:700; color:var(--text-primary);">StockBot Pro Copilot</span>
+                    </div>
                 </div>
-            </div>
-            <div class="controls">
-                <button class="theme-toggle" aria-label="Toggle theme">
-                    <i class="fas fa-moon"></i>
+                <button class="btn-secondary" style="padding:0.35rem 0.8rem; font-size:0.8rem;" onclick="clearChat()">
+                    <i class="fa-solid fa-broom"></i> Clear
                 </button>
             </div>
-        </header>
 
-        <div class="chat-container" id="chatContainer">
-            <!-- Messages will be added here -->
-        </div>
-
-        <div class="typing-indicator">
-            <div class="typing-dots">
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            </div>
-        </div>
-
-        <div class="input-container">
-            <div class="input-wrapper">
-                <input type="text" class="message-input" placeholder="Type your message..." aria-label="Message input">
-                <div class="action-buttons">
-                    <button class="action-button" aria-label="Add attachment">
-                        <i class="fas fa-paperclip"></i>
-                    </button>
-                    <button class="action-button" aria-label="Voice input">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    <button class="send-button">
-                        <span>Send</span>
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+            <div class="chat-messages" id="chatContainer">
+                <div class="message bot-message">
+                    <div class="message-avatar">AI</div>
+                    <div class="message-content">
+                        👋 Welcome to <strong>VirtualStock AI Assistant</strong>! I can help you analyze chart patterns, calculate risk/reward ratios, explain complex market concepts, or give insights on stocks like RELIANCE, TCS, AAPL, and NVDA. How can I help you trade smarter today?
+                    </div>
                 </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> StockBot is analyzing market data...
+            </div>
+
+            <div class="suggestion-chips">
+                <div class="chip" onclick="sendQuickPrompt('What is a Stop-Loss and how should I set it?')">🛡️ What is Stop-Loss?</div>
+                <div class="chip" onclick="sendQuickPrompt('Analyze RELIANCE stock trends')">📈 Analyze RELIANCE</div>
+                <div class="chip" onclick="sendQuickPrompt('Explain Bull vs Bear Market')">🐂 Bull vs Bear Market</div>
+                <div class="chip" onclick="sendQuickPrompt('How is P&L calculated in stock trading?')">💰 How is P&L calculated?</div>
+                <div class="chip" onclick="sendQuickPrompt('Best risk management rules for beginners')">🎯 Risk Management Tips</div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="messageInput" placeholder="Ask about stocks, indicators, or trading strategies..." onkeypress="handleKeyPress(event)">
+                <button class="btn-primary" onclick="handleSend()" style="padding:0.75rem 1.4rem;">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>
-<sript>const themeToggle = document.querySelector('.theme-toggle');
-        const body = document.body;
+
+    <script>
         const chatContainer = document.getElementById('chatContainer');
-        const messageInput = document.querySelector('.message-input');
-        const sendButton = document.querySelector('.send-button');
-        const typingIndicator = document.querySelector('.typing-indicator');
+        const messageInput = document.getElementById('messageInput');
+        const typingIndicator = document.getElementById('typingIndicator');
 
-        // Theme toggling
-        let isDarkTheme = false;
-        themeToggle.addEventListener('click', () => {
-            isDarkTheme = !isDarkTheme;
-            body.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
-            themeToggle.innerHTML = isDarkTheme ? 
-                '<i class="fas fa-sun"></i>' : 
-                '<i class="fas fa-moon"></i>';
-        });
-
-        // Chat functionality
-        function createMessageElement(content, isUser = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            
-            messageDiv.innerHTML = `
-                <div class="avatar">${isUser ? 'U' : 'AI'}</div>
-                <div class="message-bubble">${content}</div>
-            `;
-            
-            return messageDiv;
-        }
+        const KNOWLEDGE_BASE = {
+            'stop-loss': "A **Stop-Loss order** limits potential loss by automatically selling a stock once it reaches a predefined trigger price. For example, if you buy RELIANCE at ₹2,980, setting a stop-loss at ₹2,900 prevents losses greater than ~2.7%. Standard recommendation is risking no more than 1-2% of total portfolio on any single trade.",
+            'reliance': "📊 **RELIANCE (Reliance Industries Ltd.) Analysis**:\n- Current Price: ~₹2,980.50\n- Trend: Bullish above 50-day moving average.\n- Key Support: ₹2,920 | Resistance: ₹3,050\n- Strategy: Buy on dips near support with a trailing stop-loss.",
+            'tcs': "📊 **TCS (Tata Consultancy Services) Analysis**:\n- Current Price: ~₹4,250.40\n- Trend: Steady consolidation near all-time highs.\n- Key Support: ₹4,180 | Resistance: ₹4,350\n- Strategy: Long-term value accumulator.",
+            'bull': "🐂 **Bull vs Bear Market**:\n- **Bull Market**: Optimistic market condition characterized by sustained upward price trends, strong investor confidence, and economic growth.\n- **Bear Market**: Downtrend where prices drop 20% or more from recent peaks, driven by negative sentiment and selling pressure.",
+            'p&l': "💰 **P&L (Profit & Loss) Calculation**:\n- **Unrealized P&L**: (Current Market Price - Avg Purchase Price) × Quantity Held.\n- **Realized P&L**: (Selling Execution Price - Avg Purchase Price) × Quantity Sold.\n- **ROI %**: (Total P&L / Total Invested Capital) × 100.",
+            'risk': "🎯 **Top Risk Management Rules for Beginners**:\n1. Never risk more than 1-2% of your capital on a single trade.\n2. Always define your stop-loss *before* entering an order.\n3. Maintain a Risk-to-Reward ratio of at least 1:2.\n4. Avoid emotional revenge-trading after a loss.\n5. Diversify across sectors (Tech, Banking, Energy, Pharma)."
+        };
 
         function addMessage(content, isUser = false) {
-            const messageElement = createMessageElement(content, isUser);
-            chatContainer.appendChild(messageElement);
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            msgDiv.innerHTML = `
+                <div class="message-avatar">${isUser ? 'YOU' : 'AI'}</div>
+                <div class="message-content">${formatMarkdown(content)}</div>
+            `;
+            chatContainer.appendChild(msgDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        function showTypingIndicator() {
+        function formatMarkdown(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function handleSend() {
+            const query = messageInput.value.trim();
+            if (!query) return;
+            addMessage(query, true);
+            messageInput.value = '';
+            processBotResponse(query);
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') handleSend();
+        }
+
+        function sendQuickPrompt(promptText) {
+            messageInput.value = promptText;
+            handleSend();
+        }
+
+        function processBotResponse(query) {
             typingIndicator.style.display = 'block';
             chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
 
-        function hideTypingIndicator() {
-            typingIndicator.style.display = 'none';
-        }
-
-        function simulateBotResponse(userMessage) {
-            showTypingIndicator();
-            
-            // Simulate varying response times
             setTimeout(() => {
-                hideTypingIndicator();
-                const responses = [
-                    "I understand you're asking about " + userMessage + ". Could you elaborate?",
-                    "That's an interesting point about " + userMessage + ". Let me help you with that.",
-                    "I've analyzed your message about " + userMessage + ". Here's what I think..."
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addMessage(randomResponse);
-            }, Math.random() * 1000 + 1500);
+                typingIndicator.style.display = 'none';
+                const lower = query.toLowerCase();
+                let answer = null;
+
+                for (const key in KNOWLEDGE_BASE) {
+                    if (lower.includes(key)) {
+                        answer = KNOWLEDGE_BASE[key];
+                        break;
+                    }
+                }
+
+                if (!answer) {
+                    answer = `Based on current market parameters for "${query}", volatility is moderate. Always verify support/resistance levels and maintain a strict stop-loss before executing orders on the VirtualStock platform.`;
+                }
+
+                addMessage(answer, false);
+            }, 800);
         }
 
-        function handleSendMessage() {
-            const message = messageInput.value.trim();
-            if (message) {
-                addMessage(message, true);
-                messageInput.value = '';
-                simulateBotResponse(message);
-            }
+        function clearChat() {
+            chatContainer.innerHTML = '';
+            addMessage("👋 Chat history cleared. Ask me any question about stocks, trades, or portfolio strategy!", false);
         }
-
-        sendButton.addEventListener('click', handleSendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleSendMessage();
-            }
-        });
-
-        setTimeout(() => {
-            addMessage("Hello! I'm your AI assistant. How can I help you today?");
-        }, 500);
     </script>
 </body>
+</html>

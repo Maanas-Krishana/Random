@@ -3,61 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Stock </title>
+    <title>Virtual Stock | Next-Gen Paper Trading Platform</title>
+    <meta name="description" content="Experience realistic virtual stock trading with zero financial risk. Real-time market data, AI trading assistant, and smart portfolio tracking.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     
-<header>
-    <div class="logo">Virtual Stock</div>
-    <nav>
-    <input type="text" placeholder="Search..." id="searchBar">
-    <button type="button" id="searchButton">Search</button>
-</nav>
-    <nav>
-   <div class="inputBox">
-    <a href="login.html.html">Login</a>
-            <input type="button" value="Login" id="btn">
-        </div>    
-    </nav>
-</header>
-    <div class="carousel">
-        <div class="list">
-            <div class="item">
-                <div class="des">
-                    <div class="des">
-                        <!-- 20 lorem -->
-                        "Stock trading requires knowledge, strategy, and 
-                        discipline—stay informed and make data-driven investment decisions." 
-                        dolor sit amet consectetur adipisicing elit. Officia, laborum cumque dignissimos quidem atque et 
-                        eligendi aperiam voluptates beatae maxime.
-                    </div>
-                 
-                </div>
-                <div class="des">
-                    <div class="title">"virtual stock"</div>
-                    <div class="des">
+    <!-- Top Navigation Header -->
+    <header>
+        <div class="logo" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>VirtualStock</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="index.html" class="nav-link active"><i class="fa-solid fa-house"></i> Markets</a>
+            <a href="profit_loss.html" class="nav-link"><i class="fa-solid fa-wallet"></i> Portfolio & P/L</a>
+            <a href="chat.html" class="nav-link"><i class="fa-solid fa-robot"></i> AI Analyst</a>
+        </nav>
+
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" placeholder="Search AAPL, TSLA, NIFTY..." id="searchBar">
+        </div>
+
+        <div class="header-actions">
+            <div class="balance-badge" title="Virtual Trading Balance">
+                <i class="fa-solid fa-coins"></i>
+                <span id="userBalanceDisplay">₹1,00,000</span>
+            </div>
+            <a href="login.html" class="btn-primary" id="authBtn">
+                <i class="fa-solid fa-user"></i>
+                <span>Account</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Moving Stock Ticker Banner -->
+    <div class="ticker-wrap">
+        <div class="ticker-items" id="liveTicker">
+            <div class="ticker-item"><span class="ticker-symbol">NIFTY 50</span> <span class="ticker-price">₹24,850.30</span> <span class="ticker-change up"><i class="fa-solid fa-arrow-trend-up"></i> +1.24%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">SENSEX</span> <span class="ticker-price">₹81,390.15</span> <span class="ticker-change up"><i class="fa-solid fa-arrow-trend-up"></i> +0.95%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">RELIANCE</span> <span class="ticker-price">₹2,980.00</span> <span class="ticker-change up"><i class="fa-solid fa-arrow-trend-up"></i> +2.10%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">TCS</span> <span class="ticker-price">₹4,250.40</span> <span class="ticker-change down"><i class="fa-solid fa-arrow-trend-down"></i> -0.45%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">AAPL</span> <span class="ticker-price">$224.50</span> <span class="ticker-change up"><i class="fa-solid fa-arrow-trend-up"></i> +1.80%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">NVDA</span> <span class="ticker-price">$128.20</span> <span class="ticker-change up"><i class="fa-solid fa-arrow-trend-up"></i> +3.40%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">TSLA</span> <span class="ticker-price">$214.10</span> <span class="ticker-change down"><i class="fa-solid fa-arrow-trend-down"></i> -1.15%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">HDFCBANK</span> <span class="ticker-price">₹1,640.80</span> <span class="ticker-change up"><i class="fa-solid fa-arrow-trend-up"></i> +0.65%</span></div>
+        </div>
+    </div>
+
+    <!-- Hero Carousel -->
+    <main class="hero-section">
+        <div class="carousel">
+            <div class="list">
+                <!-- Slide 1: Virtual Stock Introduction -->
+                <div class="item active">
+                    <div class="item-content">
+                        <div class="item-badge"><i class="fa-solid fa-bolt"></i> Zero Risk, Real Markets</div>
+                        <h1 class="item-title">Master the Stock Market with <span>Virtual Capital</span></h1>
+                        <p class="item-description">
+                            Experience live market volatility, execute instant simulated trades, and test advanced strategies with ₹1,00,000 in virtual funds.
+                        </p>
+                        <div class="item-stats">
+                            <div class="stat-box">
+                                <div class="stat-label">Virtual Capital</div>
+                                <div class="stat-value">₹1,00,000</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Execution Speed</div>
+                                <div class="stat-value">&lt; 50ms</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">AI Insights</div>
+                                <div class="stat-value">24/7 Live</div>
+                            </div>
                         </div>
-                    
-                        <div>
-                            <button></button>
+                        <div class="item-actions">
+                            <button class="btn-primary" onclick="openTradeModal('RELIANCE', 2980.00)">
+                                <i class="fa-solid fa-bolt-lightning"></i> Quick Trade
+                            </button>
+                            <a href="chat.html" class="btn-secondary">
+                                <i class="fa-solid fa-robot"></i> Ask AI Analyst
+                            </a>
+                        </div>
+                    </div>
+                    <div class="item-visual">
+                        <div class="visual-card">
+                            <div class="card-floating-badge"><i class="fa-solid fa-chart-simple"></i> Live Market Pulse</div>
+                            <img src="images/im4.png" alt="Market Analytics Overview">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <h4 style="font-weight:700; font-size:1.1rem;">NIFTY Top Performer</h4>
+                                    <p style="color:var(--text-muted); font-size:0.85rem;">Volume: 4.8M trades today</p>
+                                </div>
+                                <span class="ticker-change up" style="font-size:0.9rem; padding:0.3rem 0.7rem;">+2.45% Today</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div> 
-<div class="item">
-                <img src="images/im4.png">
-                <div class="introduce">
-                   
-                    <div class="topic">Virtual Stock</div>
-                    <div class="des">
-                        <!-- 20 lorem -->
-                        "Stock trading requires knowledge, strategy, and discipline—stay informed and make data-driven investment decisions."                    </div>
+
+                <!-- Slide 2: AI Assistant Spotlight -->
+                <div class="item">
+                    <div class="item-content">
+                        <div class="item-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Powered Copilot</div>
+                        <h2 class="item-title">Smart AI Assistant For <span>Market Analysis</span></h2>
+                        <p class="item-description">
+                            Get real-time answers about chart patterns, RSI indicators, stop-loss strategy, earnings reports, and macro trends.
+                        </p>
+                        <div class="item-stats">
+                            <div class="stat-box">
+                                <div class="stat-label">Analysis Models</div>
+                                <div class="stat-value">Technical & Funda</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Risk Calculator</div>
+                                <div class="stat-value">Automated</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Chat Response</div>
+                                <div class="stat-value">Instant</div>
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <a href="chat.html" class="btn-primary">
+                                <i class="fa-solid fa-comments"></i> Start AI Consultation
+                            </a>
+                            <a href="profit_loss.html" class="btn-secondary">
+                                <i class="fa-solid fa-chart-pie"></i> View P&L Tracker
+                            </a>
+                        </div>
                     </div>
+                    <div class="item-visual">
+                        <div class="visual-card">
+                            <div class="card-floating-badge" style="background:#6366f1;"><i class="fa-solid fa-microchip"></i> AI Engine Ready</div>
+                            <div style="background: rgba(15,23,42,0.9); border:1px solid var(--border-glass); border-radius:12px; padding:1.5rem; margin-bottom:1rem;">
+                                <div style="display:flex; gap:0.6rem; align-items:center; margin-bottom:0.8rem;">
+                                    <div style="width:28px; height:28px; border-radius:50%; background:var(--accent-primary); display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700;">AI</div>
+                                    <span style="font-size:0.85rem; font-weight:600; color:var(--text-secondary);">StockBot Intelligence</span>
+                                </div>
+                                <p style="font-size:0.9rem; color:var(--text-primary); line-height:1.4;">
+                                    "RELIANCE showing strong momentum above 20-day EMA with expanding volume. Target: ₹3,050, Stop Loss: ₹2,920."
+                                </p>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:0.85rem; color:var(--text-muted);">Confidence Score: 88%</span>
+                                <span class="ticker-change up">Bullish Breakout</span>
+                            </div>
+                        </div>
                     </div>
-             </div>           
-     
-           
-            
+                </div>
+            </div>
+
+            <!-- Carousel Navigation Arrows -->
+            <div class="carousel-controls">
+                <button class="carousel-btn" id="prev" aria-label="Previous Slide"><i class="fa-solid fa-arrow-left"></i></button>
+                <button class="carousel-btn" id="next" aria-label="Next Slide"><i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Watchlist & Markets Section -->
+    <section class="section-wrapper">
+        <div class="section-header">
+            <h2 class="section-title">Trending Stock Watchlist</h2>
+            <p class="section-subtitle">Live real-time paper trading across popular market leaders</p>
+        </div>
+
+        <div class="stocks-grid" id="stocksContainer">
+            <!-- Stock Cards dynamically populated by JS -->
+        </div>
+    </section>
+
+    <!-- Quick Trade Modal -->
+    <div class="modal-overlay" id="tradeModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 style="font-family:var(--font-display); font-size:1.3rem;" id="modalStockTitle">Trade Stock</h3>
+                <button class="modal-close" onclick="closeTradeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; padding:0.8rem; background:rgba(255,255,255,0.04); border-radius:var(--radius-sm);">
+                <div>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Market Price</span>
+                    <h4 style="font-size:1.2rem; font-family:var(--font-display);" id="modalStockPrice">₹0.00</h4>
+                </div>
+                <div style="text-align:right;">
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Available Cash</span>
+                    <h4 style="font-size:1.2rem; font-family:var(--font-display); color:var(--accent-success);" id="modalAvailableBalance">₹1,00,000</h4>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="tradeQuantity">Order Quantity (Shares)</label>
+                <input type="number" id="tradeQuantity" class="form-input" min="1" value="10" oninput="updateOrderTotal()">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="tradeStopLoss">Stop Loss Price (Optional)</label>
+                <input type="number" id="tradeStopLoss" class="form-input" placeholder="e.g. 2900">
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.4rem;">
+                <span style="font-size:0.9rem; color:var(--text-secondary);">Estimated Total:</span>
+                <span style="font-size:1.3rem; font-weight:800; font-family:var(--font-display);" id="modalOrderTotal">₹0.00</span>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.6rem;">
+                <button class="btn-buy" onclick="executeTrade('BUY')"><i class="fa-solid fa-arrow-up-right-dots"></i> BUY</button>
+                <button class="btn-sell" onclick="executeTrade('SELL')"><i class="fa-solid fa-arrow-down-right-dots"></i> SELL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script src="app.js"></script>
 </body>
 </html>
