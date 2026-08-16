@@ -58,9 +58,3 @@ http://localhost:8000
 
 - **Frontend**: HTML5, Vanilla CSS3 (Glassmorphism), JavaScript (ES6+), Chart.js, FontAwesome
 - **Backend**: Python, Flask, Flask-SQLAlchemy, Flask-Login, SQLite
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License.
